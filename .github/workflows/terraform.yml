@@ -68,6 +68,7 @@ on:
 env:
   AWS_REGION: us-east-1
   TF_VAR_upload_bucket_name: ${{ secrets.UPLOAD_BUCKET_NAME }}
+  AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
   TF_VAR_aws_region: us-east-1
 
 jobs:
