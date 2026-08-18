@@ -99,19 +99,19 @@ jobs:
       - name: Terraform Init
         run: terraform init -reconfigure
 
-      - name: Import Existing Resources
-        run: |
-          terraform import aws_iam_role.presign_lambda_role \
-            DevOps-Accelerator-Presign-Lambda-Role
+      # - name: Import Existing Resources
+      #   run: |
+      #     terraform import aws_iam_role.presign_lambda_role \
+      #       DevOps-Accelerator-Presign-Lambda-Role
       
-          terraform import aws_iam_policy.presign_lambda_policy \
-            arn:aws:iam::${{ steps.aws-account.outputs.account_id }}:policy/DevOps-Accelerator-Presign-Lambda-Policy
+      #     terraform import aws_iam_policy.presign_lambda_policy \
+      #       arn:aws:iam::${{ steps.aws-account.outputs.account_id }}:policy/DevOps-Accelerator-Presign-Lambda-Policy
       
-          terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy \
-            arn:aws:iam::${{ steps.aws-account.outputs.account_id }}:policy/devops-accelerator-lambda-sns-publish-policy
+      #     terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy \
+      #       arn:aws:iam::${{ steps.aws-account.outputs.account_id }}:policy/devops-accelerator-lambda-sns-publish-policy
       
-          terraform import aws_cloudwatch_log_group.apigw_logs \
-            /aws/apigateway/presign-api
+      #     terraform import aws_cloudwatch_log_group.apigw_logs \
+      #       /aws/apigateway/presign-api
       - name: Terraform Format Check
         run: terraform fmt -check
 
@@ -121,8 +121,8 @@ jobs:
       - name: Terraform Plan
         run: terraform plan
 
-      - name: Terraform Apply
-        if: github.ref == 'refs/heads/main'
-        env:
-          GZIP: "false"
-        run: terraform apply -auto-approve
+      # - name: Terraform Apply
+      #   if: github.ref == 'refs/heads/main'
+      #   env:
+      #     GZIP: "false"
+      #   run: terraform apply -auto-approve
