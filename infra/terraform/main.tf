@@ -14,22 +14,22 @@ provider "aws" {
   region = var.aws_region
 }
 
-resource "aws_iam_role" "lambda_exec_role" {
-  name = "lambda_exec_role"
+# resource "aws_iam_role" "lambda_exec_role" {
+#   name = "lambda_exec_role"
 
-  assume_role_policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Action = "sts:AssumeRole",
-        Effect = "Allow",
-        Principal = {
-          Service = "lambda.amazonaws.com"
-        }
-      }
-    ]
-  })
-}
+#   assume_role_policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Action = "sts:AssumeRole",
+#         Effect = "Allow",
+#         Principal = {
+#           Service = "lambda.amazonaws.com"
+#         }
+#       }
+#     ]
+#   })
+# }
 
 resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
   role       = aws_iam_role.lambda_exec_role.name
@@ -274,10 +274,10 @@ resource "aws_apigatewayv2_route" "presign_route" {
   target    = "integrations/${aws_apigatewayv2_integration.presign_api_integration.id}"
 }
 
-resource "aws_cloudwatch_log_group" "apigw_logs" {
-  name              = "/aws/apigateway/presign-api"
-  retention_in_days = 7
-}
+# resource "aws_cloudwatch_log_group" "apigw_logs" {
+#   name              = "/aws/apigateway/presign-api"
+#   retention_in_days = 7
+# }
 
 resource "aws_apigatewayv2_stage" "presign_stage" {
   api_id      = aws_apigatewayv2_api.presign_api.id
@@ -318,20 +318,20 @@ resource "aws_sns_topic_subscription" "devops_accelerator_email_sub" {
   endpoint  = var.notification_email
 }
 
-resource "aws_iam_policy" "devops_accelerator_lambda_sns_policy" {
-  name = "devops-accelerator-lambda-sns-publish-policy"
+# resource "aws_iam_policy" "devops_accelerator_lambda_sns_policy" {
+#   name = "devops-accelerator-lambda-sns-publish-policy"
 
-  policy = jsonencode({
-    Version = "2012-10-17",
-    Statement = [
-      {
-        Effect   = "Allow",
-        Action   = "sns:Publish",
-        Resource = aws_sns_topic.devops_accelerator_upload_notify.arn
-      }
-    ]
-  })
-}
+#   policy = jsonencode({
+#     Version = "2012-10-17",
+#     Statement = [
+#       {
+#         Effect   = "Allow",
+#         Action   = "sns:Publish",
+#         Resource = aws_sns_topic.devops_accelerator_upload_notify.arn
+#       }
+#     ]
+#   })
+# }
 
 resource "aws_iam_role_policy_attachment" "lambda_sns_policy_attachment" {
   role       = aws_iam_role.lambda_exec_role.name

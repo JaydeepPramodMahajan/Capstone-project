@@ -127,6 +127,15 @@ jobs:
       
           echo "Checking lambda role:"
           terraform state show aws_iam_role.lambda_exec_role
+      - name: Import Existing Resources (idempotent)
+        run: |
+            import_if_missing() {
+              terraform state show "$1" >/dev/null 2>&1 || terraform import "$1" "$2"
+            }
+            import_if_missing aws_iam_role.presign_lambda_role DevOps-Accelerator-Presign-Lambda-Role
+            import_if_missing aws_iam_policy.presign_lambda_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/DevOps-Accelerator-Presign-Lambda-Policy
+            import_if_missing aws_iam_policy.devops_accelerator_lambda_sns_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/devops-accelerator-lambda-sns-publish-policy
+            import_if_missing aws_cloudwatch_log_group.apigw_logs /aws/apigateway/presign-api   
       - name: Terraform Validate
         run: terraform validate
 
