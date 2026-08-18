@@ -6,7 +6,7 @@ on:
       - "backend/lambda/process-uploaded-file/**"
     branches:
       - main
-
+      - master
 env:
   AWS_REGION: us-east-1
   LAMBDA_FUNCTION_NAME: ${{ secrets.LAMBDA_FUNCTION_NAME }}
