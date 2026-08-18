@@ -1,3 +1,62 @@
+# name: Terraform Deploy
+
+# on:
+#   push:
+#     branches:
+#       - main
+#       - master
+
+# env:
+#   AWS_REGION: us-east-1
+#   TF_VAR_upload_bucket_name: ${{ secrets.UPLOAD_BUCKET_NAME }}
+#   TF_VAR_aws_region: us-east-1
+
+# jobs:
+#   terraform:
+#     name: Terraform Apply
+#     runs-on: ubuntu-latest
+
+#     defaults:
+#       run:
+#         working-directory: infra/terraform
+
+#     steps:
+#       - name: Checkout repo
+#         uses: actions/checkout@v4
+
+#       - name: Setup Terraform
+#         uses: hashicorp/setup-terraform@v3
+#         with:
+#           terraform_version: 1.6.6
+
+#       - name: Configure AWS credentials
+#         uses: aws-actions/configure-aws-credentials@v2
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: ${{ env.AWS_REGION }}
+
+#       - name: Terraform Init (Reconfigure)
+#         run: terraform init -reconfigure
+
+#       - name: Import existing AWS resources
+#         run: |
+#           terraform import aws_iam_role.lambda_exec_role lambda_exec_role 
+      
+#           terraform import aws_iam_role.presign_lambda_role DevOps-Accelerator-Presign-Lambda-Role 
+      
+#           terraform import aws_iam_policy.presign_lambda_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/DevOps-Accelerator-Presign-Lambda-Policy 
+      
+#           terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/devops-accelerator-lambda-sns-publish-policy 
+      
+#           terraform import aws_cloudwatch_log_group.apigw_logs /aws/apigateway/presign-api
+#       - name: Terraform Plan
+#         run: terraform plan
+
+#       - name: Terraform Apply
+#         env:
+#           GZIP: "false"
+#         run: terraform apply -auto-approve
 name: Terraform Deploy
 
 on:
@@ -30,27 +89,42 @@ jobs:
           terraform_version: 1.6.6
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Import existing AWS resources
-        run: |
-            terraform import aws_iam_role.lambda_exec_role lambda_exec_role || true
-            terraform import aws_iam_role.presign_lambda_role DevOps-Accelerator-Presign-Lambda-Role || true
-            terraform import aws_iam_policy.presign_lambda_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/DevOps-Accelerator-Presign-Lambda-Policy || true
-            terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/devops-accelerator-lambda-sns-publish-policy || true
-            terraform import aws_cloudwatch_log_group.apigw_logs /aws/apigateway/presign-api || true
-      - name: Terraform Init (Reconfigure)
+      - name: Terraform Init
         run: terraform init -reconfigure
 
+      - name: Import Existing Resources
+        run: |
+          terraform import aws_iam_role.lambda_exec_role lambda_exec_role
+
+          terraform import aws_iam_role.presign_lambda_role \
+            DevOps-Accelerator-Presign-Lambda-Role
+
+          terraform import aws_iam_policy.presign_lambda_policy \
+            arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/DevOps-Accelerator-Presign-Lambda-Policy
+
+          terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy \
+            arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/devops-accelerator-lambda-sns-publish-policy
+
+          terraform import aws_cloudwatch_log_group.apigw_logs \
+            /aws/apigateway/presign-api
+
+      - name: Terraform Format Check
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
 
       - name: Terraform Plan
         run: terraform plan
 
       - name: Terraform Apply
+        if: github.ref == 'refs/heads/main'
         env:
           GZIP: "false"
         run: terraform apply -auto-approve
