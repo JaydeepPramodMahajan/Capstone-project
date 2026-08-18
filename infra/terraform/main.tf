@@ -2,10 +2,10 @@ terraform {
   required_version = ">= 1.5.0"
 
   backend "s3" {
-    bucket         = "s3-bucket-123990"
+    bucket         = "state-file-bucket1"
     key            = "global/devops-accelerator/terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = "dynamodbtable-123990"
+    dynamodb_table = "state-file-dynamodb"
     encrypt        = true
   }
 }
@@ -47,12 +47,12 @@ resource "aws_s3_bucket" "upload_bucket" {
 }
 
 resource "aws_lambda_function" "process_uploaded_file" {
-  function_name = "process-uploaded-file"
-  runtime       = "python3.11"
-  handler       = "main.lambda_handler"
-  filename      = "${path.module}/../../backend/lambda/process-uploaded-file/lambda.zip"
+  function_name    = "process-uploaded-file"
+  runtime          = "python3.11"
+  handler          = "main.lambda_handler"
+  filename         = "${path.module}/../../backend/lambda/process-uploaded-file/lambda.zip"
   source_code_hash = filebase64sha256("${path.module}/../../backend/lambda/process-uploaded-file/lambda.zip")
-  role = aws_iam_role.lambda_exec_role.arn
+  role             = aws_iam_role.lambda_exec_role.arn
 
   environment {
     variables = {
@@ -235,11 +235,11 @@ resource "aws_iam_role_policy_attachment" "presign_lambda_attach" {
 }
 
 resource "aws_lambda_function" "presign_lambda" {
-  function_name = "DevOps-Accelerator-Presign-Handler"
-  role          = aws_iam_role.presign_lambda_role.arn
-  handler       = "main.lambda_handler"
-  runtime       = "python3.12"
-  filename      = "${path.module}/../../backend/lambda/generate-presigned-url/lambda.zip"
+  function_name    = "DevOps-Accelerator-Presign-Handler"
+  role             = aws_iam_role.presign_lambda_role.arn
+  handler          = "main.lambda_handler"
+  runtime          = "python3.12"
+  filename         = "${path.module}/../../backend/lambda/generate-presigned-url/lambda.zip"
   source_code_hash = filebase64sha256("${path.module}/../../backend/lambda/generate-presigned-url/lambda.zip")
 
   environment {
@@ -261,10 +261,10 @@ resource "aws_apigatewayv2_api" "presign_api" {
 }
 
 resource "aws_apigatewayv2_integration" "presign_api_integration" {
-  api_id             = aws_apigatewayv2_api.presign_api.id
-  integration_type   = "AWS_PROXY"
-  integration_uri    = aws_lambda_function.presign_lambda.invoke_arn
-  integration_method = "POST"
+  api_id                 = aws_apigatewayv2_api.presign_api.id
+  integration_type       = "AWS_PROXY"
+  integration_uri        = aws_lambda_function.presign_lambda.invoke_arn
+  integration_method     = "POST"
   payload_format_version = "2.0"
 }
 
@@ -291,11 +291,11 @@ resource "aws_apigatewayv2_stage" "presign_stage" {
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.apigw_logs.arn
     format = jsonencode({
-      requestId      = "$context.requestId",
-      requestTime    = "$context.requestTime",
-      httpMethod     = "$context.httpMethod",
-      path           = "$context.path",
-      status         = "$context.status"
+      requestId   = "$context.requestId",
+      requestTime = "$context.requestTime",
+      httpMethod  = "$context.httpMethod",
+      path        = "$context.path",
+      status      = "$context.status"
     })
   }
 }
