@@ -36,6 +36,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
+      - name: Import existing AWS resources
+        run: |
+            terraform import aws_iam_role.lambda_exec_role lambda_exec_role || true
+            terraform import aws_iam_role.presign_lambda_role DevOps-Accelerator-Presign-Lambda-Role || true
+            terraform import aws_iam_policy.presign_lambda_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/DevOps-Accelerator-Presign-Lambda-Policy || true
+            terraform import aws_iam_policy.devops_accelerator_lambda_sns_policy arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:policy/devops-accelerator-lambda-sns-publish-policy || true
+            terraform import aws_cloudwatch_log_group.apigw_logs /aws/apigateway/presign-api || true
       - name: Terraform Init (Reconfigure)
         run: terraform init -reconfigure
 
